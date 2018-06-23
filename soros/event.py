@@ -14,8 +14,10 @@ class Hub:
             self._subscribers[key].add(subscriber)
 
     def publish(self, key, *args, **kwargs):
-        for subscriber in self._subscribers[key]:
-            subscriber(*args, **kwargs)
+        for key_, values in self._subscribers.items():
+            if key.startswith(key_):
+                for subscriber in values:
+                    subscriber(*args, **kwargs)
 
     def remove_subscriber(self, subscriber, *keys):
         for key in keys:

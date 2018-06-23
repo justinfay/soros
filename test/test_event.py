@@ -46,5 +46,15 @@ def test_two_subscribers():
     hub.remove_subscriber(subscriber_1, 'foo')
 
 
+def test_sub_key():
+    subscriber = Mock()
+    hub.add_subscriber(subscriber, 'foo')
+    hub.publish('foo:bar', 1, 2, 3)
+    subscriber.assert_called_once_with(1, 2, 3)
+    hub.remove_subscriber(subscriber, 'foo')
 
-
+    subscriber = Mock()
+    hub.add_subscriber(subscriber, 'foo:bar:bang')
+    hub.publish('foo:bar', 1, 2, 3)
+    assert subscriber.call_count == 0
+    hub.remove_subscriber(subscriber, 'foo')
