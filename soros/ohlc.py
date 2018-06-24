@@ -5,17 +5,32 @@ from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 import math
 
+from .constants import *
+from .event import hub
+
 
 class OHLC:
     """
     A bar (OHLC) creator and provider.
     """
 
-    def __init__(self, interval=timedelta(minutes=1), max_bars=60*60*24*7):
+    def __init__(
+            self,
+            exchange,
+            symbol,
+            interval=timedelta(minutes=1),
+            bars=None,
+            max_bars=60*60*24*7):
+        self.exchange = exchange
+        self.symbol = symbol
         self.interval = interval
-        self._bars = []
+        self._bars = bars if bars is not None else []
         self.max_bars = max_bars
         self.current_bar = None
+
+        # Set this as a listener for ticks.
+        key = "{}:{}:{}".format(TICK, self.exchange, self.symbol)
+        hub.add_subscriber(self.on_tick, key)
 
     def on_tick(self, price):
         """
@@ -24,9 +39,24 @@ class OHLC:
         if self.current_bar is None:
             self._first_bar(price)
         elif datetime.utcnow() >= self.interval + self.current_bar['start']:
-            self._new_bar( price)
+            # Publish the complete bar.
+            key = "{}:{}:{}:{}".format(
+                COMPLETED_BAR,
+                self.exchange,
+                self.symbol,
+                int(self.interval.total_seconds()))
+            hub.publish(key, self.current_bar)
+            self._new_bar(price)
         else:
             self._update_bar(price)
+        # Publish the current bar.
+        key = "{}:{}:{}:{}".format(
+            UPDATED_BAR,
+            self.exchange,
+            self.symbol,
+            int(self.interval.total_seconds()))
+        hub.publish(key, self.current_bar)
+
 
     def _first_bar(self, price):
         """
@@ -91,6 +121,7 @@ class OHLC:
         """
         Return the last `n` bars.
         """
+        # TODO: Call load bar if needed.
         if self.current_bar is None:
             return []
         return [*self._bars[-(n-1):], self.current_bar]
