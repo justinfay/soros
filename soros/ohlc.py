@@ -44,8 +44,13 @@ class OHLC:
                 COMPLETED_BAR,
                 self.exchange,
                 self.symbol,
-                int(self.interval.total_seconds()))
-            hub.publish(key, self.current_bar)
+                self.interval.total_seconds())
+            hub.publish(
+                key,
+                self.exchange,
+                self.symbol,
+                self.interval,
+                self.current_bar)
             self._new_bar(price)
         else:
             self._update_bar(price)
@@ -54,8 +59,13 @@ class OHLC:
             UPDATED_BAR,
             self.exchange,
             self.symbol,
-            int(self.interval.total_seconds()))
-        hub.publish(key, self.current_bar)
+            self.interval.total_seconds())
+        hub.publish(
+            key,
+            self.exchange,
+            self.symbol,
+            self.interval,
+            self.current_bar)
 
     def _first_bar(self, price):
         """
@@ -70,6 +80,7 @@ class OHLC:
         # But we fast forward to the closest segment.
         start_datetime = datetime.combine(date.today(), time())
         now = datetime.utcnow()
+        # Should this be `now - self.interval`?
         while now > start_datetime + self.interval:
             start_datetime += self.interval
         bar['start'] = start_datetime

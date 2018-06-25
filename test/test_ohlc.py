@@ -133,7 +133,7 @@ def test_bar_first_events(monkeypatch):
             UPDATED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
             'open': 10,
             'high': 10,
@@ -147,7 +147,8 @@ def test_bar_first_events(monkeypatch):
                 minute=30,
                 second=0)
         }
-    mock_hub.publish.assert_called_once_with(key, bar)
+    mock_hub.publish.assert_called_once_with(
+        key, 'exchange', 'symbol', interval, bar)
 
 
 def test_updated_bar_event(monkeypatch):
@@ -169,7 +170,7 @@ def test_updated_bar_event(monkeypatch):
             UPDATED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
         'open': 10,
         'high': 10,
@@ -183,7 +184,8 @@ def test_updated_bar_event(monkeypatch):
             minute=30,
             second=0)
         }
-        mock_hub.publish.assert_called_once_with(key, bar)
+        mock_hub.publish.assert_called_once_with(
+            key, 'exchange', 'symbol', interval, bar)
 
         time.tick(timedelta(seconds=1))
         bars.on_tick(11)
@@ -191,7 +193,7 @@ def test_updated_bar_event(monkeypatch):
             UPDATED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
             'open': 10,
             'high': 11,
@@ -206,7 +208,8 @@ def test_updated_bar_event(monkeypatch):
                 second=0)
         }
     assert mock_hub.publish.call_count == 2
-    mock_hub.publish.assert_any_call(key, bar)
+    mock_hub.publish.assert_any_call(
+        key, 'exchange', 'symbol', interval, bar)
 
 
 def test_complete_bar_event(monkeypatch):
@@ -228,7 +231,7 @@ def test_complete_bar_event(monkeypatch):
             UPDATED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
         'open': 10,
         'high': 10,
@@ -242,7 +245,8 @@ def test_complete_bar_event(monkeypatch):
             minute=30,
             second=0)
         }
-        mock_hub.publish.assert_called_once_with(key, bar)
+        mock_hub.publish.assert_called_once_with(
+            key, 'exchange', 'symbol', interval, bar)
 
         time.tick(timedelta(seconds=60))
         bars.on_tick(11)
@@ -251,7 +255,7 @@ def test_complete_bar_event(monkeypatch):
             COMPLETED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
         'open': 10,
         'high': 10,
@@ -270,7 +274,7 @@ def test_complete_bar_event(monkeypatch):
             UPDATED_BAR,
             'exchange',
             'symbol',
-            int(interval.total_seconds()))
+            interval.total_seconds())
         bar = {
             'open': 10,
             'high': 11,
@@ -284,7 +288,8 @@ def test_complete_bar_event(monkeypatch):
                 minute=31,
                 second=0)
         }
-        mock_hub.publish.assert_any_call(key, bar)
+        mock_hub.publish.assert_any_call(
+            key, 'exchange', 'symbol', interval, bar)
         assert mock_hub.publish.call_count == 3
 
 
