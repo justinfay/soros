@@ -57,7 +57,6 @@ class OHLC:
             int(self.interval.total_seconds()))
         hub.publish(key, self.current_bar)
 
-
     def _first_bar(self, price):
         """
         Create the first bar.
